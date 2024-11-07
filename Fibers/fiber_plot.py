@@ -19,12 +19,12 @@ U = { J_{l}(kt*r)
 """
 def fiber_plot(opc = "plot",**kwargs):
 
-    lbd = kwargs.get("lbd",452.0*nm)
-    n1 = kwargs.get("n1",1.4457) # core
-    n2 = kwargs.get("n2",1.4378) # cladding
-    a = kwargs.get("a",8*um)
-    L = kwargs.get("L",0) # azimuthal index
-    M = kwargs.get("M",2) # solution order of bessel function   
+    lbd = kwargs.get("lbd",780.0*nm)
+    n1 = kwargs.get("n1",1.5) # core
+    n2 = kwargs.get("n2",1.2) # cladding
+    a = kwargs.get("a",2*um)
+    L = kwargs.get("L",3) # azimuthal index
+    M = kwargs.get("M",1) # solution order of bessel function   
 
     V = np.sqrt(n1**2 - n2**2)*2*np.pi*a/lbd # V paramater
     k0 = 2*np.pi/lbd

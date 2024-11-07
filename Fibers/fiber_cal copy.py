@@ -30,10 +30,12 @@ num = 0 # solve index
 a = 8*um # raidus of fiber core
 A = 4 # amp of solve area
 lbd = 852*nm # wavelength
-h1 = 40*nm # mesh accuracy 1
-h2 = 40*nm # mesh accuracy 2
-
-a_2 = 4*um # the radius with in which we will use h2 for mesh size
+h1 = 40*nm # mesh accuracy 
+xlist = np.arange(1e-5*h1,a*A,h1)
+x_m = np.max(xlist,axis = None)
+## operate of homogeneous xlist mesh on inhomogeneous rho_list mesh
+P = 1.5
+rho_list = xlist* (xlist/(x_m))**P
 
 n1 = 1.4457 # core
 n2 = 1.4378 # cladding
