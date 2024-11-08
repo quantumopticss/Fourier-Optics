@@ -65,6 +65,7 @@ class waveguide_1d_plot:
         ax1 = ax.twinx()
         ax1.plot(self.xlist*1e6,nlist,label = "refractive index",c = "b")
         ax.legend()
+        ax.axvline(x=0, color='green', linestyle='--', linewidth=1.5,label = f"center")
         ax.set_xlabel("x/um")
         
         handles, labels = ax.get_legend_handles_labels()
@@ -75,9 +76,14 @@ class waveguide_1d_plot:
         plt.show()
 
 class waveguide_1d_calculate(waveguide_1d_plot):
-    def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 400):
-        self.xlist = np.linspace(x_bound[0],x_bound[1],N_mesh,endpoint = False)
-        self.hx = (x_bound[1] - x_bound[0])/N_mesh
+    def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 640):
+        # self.hx = (x_bound[1] - x_bound[0])/N_mesh
+        # xlist_r = np.arange(self.hx,x_bound[1],self.hx)
+        # xlist_l = np.arange(0,-x_bound[0]+self.hx,self.hx)
+        # self.xlist = np.concatenate((-xlist_l[::-1],xlist_r),axis = 0) 
+        
+        self.xlist = np.linspace(x_bound[0],x_bound[1],N_mesh,endpoint = True)
+        self.hx = self.xlist[1] - self.xlist[0]
         
         self.n_x = n_fun(self.xlist,*args)
         self.k0 = 2*pi/lbd0
@@ -103,14 +109,21 @@ class waveguide_1d_nonlinear(waveguide_1d_calculate):
         self.L = x_bound[1] - x_bound[0]
         self.N = N_mesh
         
-    def waveguide_n(self,mode_num = 0,delta_n_fun = lambda x: 0,E_norm = 1e2,iter = 10):
+    def waveguide_n(self,mode_num = 0,delta_n_fun = lambda x: 0,E2_norm = 1e2,iter = 10):
         self.mode_num = mode_num
         self.delta_n_fun = delta_n_fun
-        self.E_norm = E_norm
+        self.E2_norm = E2_norm
         _, self.eig_vec = eigh(self.F)
         
-        for _ in range(iter):
-            self._iteration()
+        n1 = 2*iter//3 + 1
+        i_amp = np.linspace(0.2,1,n1)
+        for i1 in range(n1):
+            self._iteration(i_amp[i1])
+        
+        n2 = iter//3 + 1
+        for _ in range(n2):
+            self._iteration(1)
+        
         
         eig_val, eig_vec = eigh(self.F)
         
@@ -118,16 +131,16 @@ class waveguide_1d_nonlinear(waveguide_1d_calculate):
         field_n = eig_vec[:,-(1+mode_num)]
         
         E_inte = np.sum(np.abs(field_n)**2,axis = None)*self.hx/self.L
-        amp = np.sqrt(self.E_norm/E_inte)
+        amp = np.sqrt(self.E2_norm/E_inte)
         n_x_n = self.n_x + self.delta_n_fun(self.xlist,field_n*amp)
         
         self._visualization(n_x_n,field_n*amp,Neff_n)
         
-    def _iteration(self):
+    def _iteration(self,i_amp = 1):
         vec = self.eig_vec[:,-(1+self.mode_num)]
-        E_inte = np.sum(np.abs(vec)**2,axis = None)*self.hx/self.L
+        E2_ave = np.sum(np.abs(vec)**2,axis = None)*self.hx/self.L
         
-        amp = np.sqrt(self.E_norm/E_inte)
+        amp = np.sqrt(self.E2_norm/E2_ave)*i_amp
 
         delta_n = self.delta_n_fun(self.xlist,vec*amp)
         mat_c_n = np.zeros_like(self.mat_d)
@@ -160,10 +173,10 @@ def main_n():
     
     d = -1e-7
     delta_n_fun = lambda x,E: d * np.abs(E)**2*(np.abs(x)<=a/2)
-    E_norm = 8e4
+    E_norm = 2e4
     
     wvg = waveguide_1d_nonlinear(lbd,n_fun,x_bound)
-    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E_norm = E_norm,iter = 200)
+    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E_norm = E_norm,iter = 40)
 
 if __name__ == "__main__":
     #main()
