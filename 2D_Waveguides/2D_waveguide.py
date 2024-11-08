@@ -63,7 +63,7 @@ class waveguide_2d:
     @staticmethod
     def _visualization_2d(N_eff,field,N_dis):
 
-        plt.imshow(np.abs(field),cmap = "rainbow")
+        plt.imshow(np.abs(field),cmap = "rainbow",interpolation = "spline36")
         plt.colorbar()
         plt.xlabel("x")
         plt.ylabel("y")
@@ -91,13 +91,13 @@ class nonlinear_waveguide_2d(waveguide_2d):
         self.field = eig_vec[:,-(1+mode_num)]
         
         ## iteration 1
-        n1 = 2*iter//3 + 1
+        n1 = iter//3 + 1
         amp_1 = np.linspace(0.2,1,n1)
         for i in range(n1):
             self._iteration_2d(amp_1[i])
 
         # iteration 2
-        n2 = iter//3 + 1
+        n2 = 2*iter//3 + 1
         for _ in range(n2):
             self._iteration_2d(1.)
         
@@ -130,7 +130,7 @@ class nonlinear_waveguide_2d(waveguide_2d):
         self.field = eig_vec[:,-(1+self.mode_num)]        
         
 def main():
-    x_bound = (-3*um,3*um)
+    x_bound = (-4*um,4*um)
     y_bound = (-4*um,4*um)
     
     a = 2*um
@@ -142,19 +142,19 @@ def main():
     n2 = 1.2
     
     # n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2) + (n1-n2)*(np.abs(y-a/2-d/2)<=d/2)*(np.abs(x) <= c/2) # + (n1-n2)*(np.abs(y+a/2+d/2)<=d/2)*(np.abs(x) <= c/2)
-    n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2)
-    # n_fun = lambda x,y : n2 + (n1-n2)*(np.sqrt(x**2 + y**2) <= a )
+    # n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2)
+    n_fun = lambda x,y : n2 + (n1-n2)*(np.sqrt(x**2 + y**2) <= a )
     
     lbd = 780*nm
-    wvg = waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 80)
-    wvg.waveguide_2d(mode_num = 1)
+    wvg = waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 128)
+    wvg.waveguide_2d(mode_num = 0)
     
 def main_n():
     x_bound = (-3*um,3*um)
-    y_bound = (-4*um,4*um)
+    y_bound = (-3*um,3*um)
     
-    a = 2*um
-    b = 3*um
+    a = 2.*um
+    b = 3.*um
     c = 1.2*um
     d = 1*um
     
@@ -172,7 +172,7 @@ def main_n():
     
     lbd = 780*nm
     wvg = nonlinear_waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 80)
-    wvg.waveguide_2d_n(mode_num = 1,delta_n_fun = delta_n_fun,E2_norm = E2_norm, iter = 6)
+    wvg.waveguide_2d_n(mode_num = 0,delta_n_fun = delta_n_fun,E2_norm = E2_norm, iter = 50)
     
 if __name__ == "__main__":
     # main()         

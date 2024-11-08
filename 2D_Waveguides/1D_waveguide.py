@@ -103,7 +103,7 @@ class waveguide_1d_calculate(waveguide_1d_plot):
         
         self._visualization(self.n_x,field,Neff)
 
-class waveguide_1d_nonlinear(waveguide_1d_calculate):
+class nonlinear_waveguide_1d(waveguide_1d_calculate):
     def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 480):
         waveguide_1d_calculate.__init__(self,lbd0,n_fun,x_bound,args,N_mesh)
         self.L = x_bound[1] - x_bound[0]
@@ -115,12 +115,12 @@ class waveguide_1d_nonlinear(waveguide_1d_calculate):
         self.E2_norm = E2_norm
         _, self.eig_vec = eigh(self.F)
         
-        n1 = 2*iter//3 + 1
+        n1 = iter//3 + 1
         i_amp = np.linspace(0.2,1,n1)
         for i1 in range(n1):
             self._iteration(i_amp[i1])
         
-        n2 = iter//3 + 1
+        n2 = 2*iter//3 + 1
         for _ in range(n2):
             self._iteration(1)
         
@@ -173,10 +173,10 @@ def main_n():
     
     d = -1e-7
     delta_n_fun = lambda x,E: d * np.abs(E)**2*(np.abs(x)<=a/2)
-    E_norm = 2e4
+    E_norm = 1e4
     
-    wvg = waveguide_1d_nonlinear(lbd,n_fun,x_bound)
-    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E_norm = E_norm,iter = 40)
+    wvg = nonlinear_waveguide_1d(lbd,n_fun,x_bound)
+    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E2_norm = E2_norm,iter = 40)
 
 if __name__ == "__main__":
     #main()
