@@ -75,14 +75,14 @@ class waveguide_1d_plot:
         ax.set_title(f"{self.mode_num}-th mode, with Neff = {Neff:.6f}")
         plt.show()
 
-class waveguide_1d_calculate(waveguide_1d_plot):
+class waveguide_1d(waveguide_1d_plot):
     def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 640):
         # self.hx = (x_bound[1] - x_bound[0])/N_mesh
         # xlist_r = np.arange(self.hx,x_bound[1],self.hx)
         # xlist_l = np.arange(0,-x_bound[0]+self.hx,self.hx)
         # self.xlist = np.concatenate((-xlist_l[::-1],xlist_r),axis = 0) 
         
-        self.xlist = np.linspace(x_bound[0],x_bound[1],N_mesh,endpoint = True)
+        self.xlist = np.linspace(x_bound[0],x_bound[1],N_mesh,endpoint = True,dtype = np.longdouble)
         self.hx = self.xlist[1] - self.xlist[0]
         
         self.n_x = n_fun(self.xlist,*args)
@@ -103,9 +103,9 @@ class waveguide_1d_calculate(waveguide_1d_plot):
         
         self._visualization(self.n_x,field,Neff)
 
-class nonlinear_waveguide_1d(waveguide_1d_calculate):
+class nonlinear_waveguide_1d(waveguide_1d):
     def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 480):
-        waveguide_1d_calculate.__init__(self,lbd0,n_fun,x_bound,args,N_mesh)
+        waveguide_1d.__init__(self,lbd0,n_fun,x_bound,args,N_mesh)
         self.L = x_bound[1] - x_bound[0]
         self.N = N_mesh
         
@@ -123,7 +123,6 @@ class nonlinear_waveguide_1d(waveguide_1d_calculate):
         n2 = 2*iter//3 + 1
         for _ in range(n2):
             self._iteration(1)
-        
         
         eig_val, eig_vec = eigh(self.F)
         
@@ -148,7 +147,7 @@ class nonlinear_waveguide_1d(waveguide_1d_calculate):
         self.F = self.mat_d + (mat_c_n*self.k0)**2
         
         _, self.eig_vec = eigh(self.F)
-        
+
 def main():
     n1 = 1.5
     n2 = 1.3
@@ -157,7 +156,7 @@ def main():
     x_bound = (-4*um,4*um)
     n_fun = lambda x: n2 + (n1-n2)*(np.abs(x)<=a/2)
     
-    wvg = waveguide_1d_calculate(lbd,n_fun,x_bound)
+    wvg = waveguide_1d(lbd,n_fun,x_bound)
     wvg.waveguide(mode_num = 0)
     
     # wvg = waveguide_1d_plot(lbd,n1,n2,a)
@@ -173,7 +172,7 @@ def main_n():
     
     d = -1e-7
     delta_n_fun = lambda x,E: d * np.abs(E)**2*(np.abs(x)<=a/2)
-    E_norm = 1e4
+    E2_norm = 1e4
     
     wvg = nonlinear_waveguide_1d(lbd,n_fun,x_bound)
     wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E2_norm = E2_norm,iter = 40)

@@ -4,7 +4,6 @@ sys.path.append(os.path.dirname(os.path.dirname(path)))
 
 from units import *
 import numpy as np
-from scipy.linalg import eigh
 import matplotlib.pyplot as plt
 from scipy import sparse
 from scipy.sparse import linalg
