@@ -51,7 +51,7 @@ class waveguide_2d:
         mat_k[np.arange(N_mesh**2),np.arange(N_mesh**2)] = self.n_xy_reshape
         
         Mat = mat_2d + (mat_k*self.k0)**2
-        self.Mat_s = sparse.csr_matrix(Mat) # sparse
+        self.Mat_s = sparse.dia_matrix(Mat) # sparse
     
     def waveguide_2d(self,mode_num = 0):
         eig_val, eig_vec = linalg.eigsh(self.Mat_s,k = mode_num + 1,which = "LA")
@@ -107,23 +107,22 @@ class nonlinear_waveguide_2d(waveguide_2d):
         field_re = np.reshape(field,[self.N_mesh,self.N_mesh],"F")
         E2_ave = np.sum(np.abs(field)**2,axis = None)*self.hx*self.hy/(self.Lx*self.Ly)
         amp = np.sqrt(self.E2_norm/E2_ave)
-        delta_n = self.delta_n_fun(self.xx,self.yy,field_re*amp) 
     
-        self._visualization_2d(Neff,field_re*amp,delta_n+self.n_xy)
+        self._visualization_2d(Neff,field_re*amp,self.delta_n+self.n_xy)
         
     def _iteration_2d(self,i_amp = 1.):
         E2_ave = np.sum(np.abs(self.field)**2,axis = None)*self.hx*self.hy/(self.Lx*self.Ly)
         amp = np.sqrt(self.E2_norm/E2_ave)*i_amp
         
         self.field_re = np.reshape(self.field,[self.N_mesh,self.N_mesh],"F") # reshape back to matric order
-        delta_n = self.delta_n_fun(self.xx,self.yy,self.field_re*amp) 
-        delta_n = np.reshape(delta_n,-1,"F") # reshape to natural order
+        self.delta_n = self.delta_n_fun(self.xx,self.yy,self.field_re*amp) 
+        delta_n = np.reshape(self.delta_n,-1,"F") # reshape to natural order
         
         Mat_i_n = np.zeros_like(self.mat_2d) 
         Mat_i_n[np.arange(self.N_mesh**2),np.arange(self.N_mesh**2)] = ((delta_n + self.n_xy_reshape)*self.k0)**2
         
-        self.Mat_i = self.mat_2d + Mat_i_n
-        self.Mat_i = sparse.csr_matrix(self.Mat_i) # sparse
+        Mat_i = self.mat_2d + Mat_i_n
+        self.Mat_i = sparse.dia_matrix(Mat_i) # sparse
         
         _, eig_vec = linalg.eigsh(self.Mat_i,k = self.mode_num + 1,which = "LA")
         self.field = eig_vec[:,-(1+self.mode_num)]        
@@ -141,12 +140,12 @@ def main():
     n2 = 1.2
     
     # n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2) + (n1-n2)*(np.abs(y-a/2-d/2)<=d/2)*(np.abs(x) <= c/2) # + (n1-n2)*(np.abs(y+a/2+d/2)<=d/2)*(np.abs(x) <= c/2)
-    # n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2)
-    n_fun = lambda x,y : n2 + (n1-n2)*(np.sqrt(x**2 + y**2) <= a )
+    n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2)
+    # n_fun = lambda x,y : n2 + (n1-n2)*(np.sqrt(x**2 + y**2) <= a )
     
     lbd = 780*nm
     wvg = waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 128)
-    wvg.waveguide_2d(mode_num = 0)
+    wvg.waveguide_2d(mode_num = 2)
     
 def main_n():
     x_bound = (-3*um,3*um)
@@ -157,8 +156,8 @@ def main_n():
     c = 1.2*um
     d = 1*um
     
-    d2 = 1e-7
-    E2_norm = 1e4
+    d2 = -1e-7
+    E2_norm = 3e4
     
     n1 = 1.5
     n2 = 1.2
@@ -171,10 +170,10 @@ def main_n():
     
     lbd = 780*nm
     wvg = nonlinear_waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 80)
-    wvg.waveguide_2d_n(mode_num = 0,delta_n_fun = delta_n_fun,E2_norm = E2_norm, iter = 50)
+    wvg.waveguide_2d_n(mode_num = 0,delta_n_fun = delta_n_fun,E2_norm = E2_norm, iter = 30)
     
 if __name__ == "__main__":
-    # main()         
-    main_n()
+    main()         
+    # main_n()
         
         

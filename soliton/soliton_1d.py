@@ -5,7 +5,6 @@ sys.path.append(os.path.dirname(os.path.dirname(path)))
 from units import *
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.linalg import eigh
 from Waveguides.waveguide_1d import waveguide_1d
 from scipy import sparse
 from scipy.sparse import linalg
@@ -13,7 +12,7 @@ from scipy.sparse import linalg
 class soliton_1d(waveguide_1d):
     def __init__(self,lbd0,n_fun_0,x_bound,args = (),N_mesh = 640):
         waveguide_1d.__init__(self,lbd0,n_fun_0,x_bound,args,N_mesh)
-        _, self.eig_vec = eigh(self.F)
+        _, self.eig_vec = linalg.eigsh(self.F)
         self.L = x_bound[1] - x_bound[0]
         self.N = N_mesh
         
@@ -33,7 +32,7 @@ class soliton_1d(waveguide_1d):
         for _ in range(n2):
             self._iteration(1.,1.)
 
-        eig_val, eig_vec = eigh(self.F)
+        eig_val, eig_vec = linalg.eigsh(self.F)
         beta = np.sqrt(eig_val[-(1+mode_num)])
         field = eig_vec[:,-(1+mode_num)]
         
@@ -41,20 +40,20 @@ class soliton_1d(waveguide_1d):
         amp = np.sqrt(self.E2_norm/E2_ave)
         Neff = beta/self.k0
         
-        nlist = n_fun_xe(self.xlist,field*amp)
-        self._visualization(nlist,field*amp,Neff)
+        self._visualization(self.n_n,field*amp,Neff)
         
-    def _iteration(self,f_amp = 1,n_amp = 1):
+    def _iteration(self,f_amp = 1.,n_amp = 1.):
         E2_ave = np.sum(np.abs(self.field)**2,axis = None)*self.hx/self.L
         amp = f_amp*np.sqrt(self.E2_norm/E2_ave)
         
         delta_n = self.n_fun_xe(self.xlist,self.field*amp)
-        n_iter = (delta_n - self.n_x)*n_amp + self.n_x
+        self.n_n = (delta_n - self.n_x)*n_amp + self.n_x
         
-        self.F = np.copy(self.mat_d)
-        self.F[np.arange(self.N),np.arange(self.N)] = self.F[np.arange(self.N),np.arange(self.N)] + (n_iter*self.k0)**2
+        F = np.copy(self.mat_d)
+        F[np.arange(self.N),np.arange(self.N)] = F[np.arange(self.N),np.arange(self.N)] + (self.n_n*self.k0)**2
+        self.F = sparse.dia_matrix(F)
         
-        _, eig_val = eigh(self.F)
+        _, eig_val = linalg.eigsh(self.F)
         self.field = eig_val[:,-(1+self.mode_num)]
 
 class soliton_1d_plot:

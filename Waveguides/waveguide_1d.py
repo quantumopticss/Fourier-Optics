@@ -6,7 +6,8 @@ from units import *
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import root_scalar
-from scipy.linalg import eigh
+from scipy import sparse 
+from scipy.sparse import linalg
 
 """
 helmholtz equation (\nabla^2 + n^2*k0^2)U = 0
@@ -37,7 +38,7 @@ class waveguide_1d_plot:
         if alpha_low > self.NA:
             raise ValueError("can't guide that mode")
         
-        res = root_scalar(waveguide_fun,bracket=(alpha_low*0.999+alpha_high*0.001,alpha_high*0.999+alpha_low*0.001),method = "bisect")
+        res = root_scalar(waveguide_fun,bracket=(alpha_low*0.999+alpha_high*0.001,alpha_high*0.999+alpha_low*0.001),method = "brenth")
         
         alpha = res.root
         kt = alpha*self.k0
@@ -92,10 +93,11 @@ class waveguide_1d(waveguide_1d_plot):
         mat_c = np.zeros_like(self.mat_d)
         mat_c[np.arange(N_mesh),np.arange(N_mesh)] = (self.n_x*self.k0)**2
     
-        self.F = self.mat_d + mat_c
+        F = self.mat_d + mat_c
+        self.F = sparse.dia_matrix(F)
     
     def waveguide(self,mode_num = 0):
-        eig_val, eig_vec = eigh(self.F)
+        eig_val, eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
         self.mode_num = mode_num
         
         Neff = np.sqrt(eig_val[-(1+mode_num)])/self.k0
@@ -113,7 +115,7 @@ class nonlinear_waveguide_1d(waveguide_1d):
         self.mode_num = mode_num
         self.delta_n_fun = delta_n_fun
         self.E2_norm = E2_norm
-        _, self.eig_vec = eigh(self.F)
+        _, self.eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
         
         n1 = iter//3 + 1
         i_amp = np.linspace(0.2,1,n1)
@@ -124,16 +126,15 @@ class nonlinear_waveguide_1d(waveguide_1d):
         for _ in range(n2):
             self._iteration(1)
         
-        eig_val, eig_vec = eigh(self.F)
+        eig_val, eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
         
         Neff_n = np.sqrt(eig_val[-(1+mode_num)])/self.k0
         field_n = eig_vec[:,-(1+mode_num)]
         
         E_inte = np.sum(np.abs(field_n)**2,axis = None)*self.hx/self.L
         amp = np.sqrt(self.E2_norm/E_inte)
-        n_x_n = self.n_x + self.delta_n_fun(self.xlist,field_n*amp)
         
-        self._visualization(n_x_n,field_n*amp,Neff_n)
+        self._visualization(self.n_x_n,field_n*amp,Neff_n)
         
     def _iteration(self,i_amp = 1):
         vec = self.eig_vec[:,-(1+self.mode_num)]
@@ -142,22 +143,26 @@ class nonlinear_waveguide_1d(waveguide_1d):
         amp = np.sqrt(self.E2_norm/E2_ave)*i_amp
 
         delta_n = self.delta_n_fun(self.xlist,vec*amp)
+        self.n_x_n = delta_n + self.n_x
         mat_c_n = np.zeros_like(self.mat_d)
-        mat_c_n[np.arange(self.N),np.arange(self.N)] = delta_n + self.n_x
-        self.F = self.mat_d + (mat_c_n*self.k0)**2
+        mat_c_n[np.arange(self.N),np.arange(self.N)] = self.n_x_n
         
-        _, self.eig_vec = eigh(self.F)
+        F = self.mat_d + (mat_c_n*self.k0)**2
+        self.F = sparse.dia_matrix(F)
+        
+        _, self.eig_vec = linalg.eigsh(self.F,k = 1+self.mode_num,which = "LA")
 
 def main():
     n1 = 1.5
-    n2 = 1.3
-    a = 2.*um
+    n2 = 1.2
+    dis = 1.6*um
+    a = 1*um
     lbd = 780*nm
-    x_bound = (-4*um,4*um)
-    n_fun = lambda x: n2 + (n1-n2)*(np.abs(x)<=a/2)
+    x_bound = (-4.5*um,4.5*um)
+    n_fun = lambda x: n2 + (n1-n2)*(np.abs(x - dis/2)<=a/2) + (n1-n2)*(np.abs(x + dis/2)<=a/2)
     
-    wvg = waveguide_1d(lbd,n_fun,x_bound)
-    wvg.waveguide(mode_num = 0)
+    wvg = waveguide_1d(lbd,n_fun,x_bound,N_mesh = 1280)
+    wvg.waveguide(mode_num = 2)
     
     # wvg = waveguide_1d_plot(lbd,n1,n2,a)
     # wvg.calculate(mode_num=0)
@@ -172,12 +177,12 @@ def main_n():
     
     d = -1e-7
     delta_n_fun = lambda x,E: d * np.abs(E)**2*(np.abs(x)<=a/2)
-    E2_norm = 1e4
+    E2_norm = 6e4
     
     wvg = nonlinear_waveguide_1d(lbd,n_fun,x_bound)
-    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E2_norm = E2_norm,iter = 40)
+    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E2_norm = E2_norm,iter = 70)
 
 if __name__ == "__main__":
-    #main()
-    main_n()
+    main()
+    # main_n()
         
