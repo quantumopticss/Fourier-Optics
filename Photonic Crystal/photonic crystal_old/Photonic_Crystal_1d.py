@@ -33,7 +33,7 @@ def pc_main():
     
     for i in range(1,N_samp):
         F_eta = F_eta + f_eta[N_samp + i]*np.eye(N_samp,k=-i,dtype = np.complex128) + f_eta[N_samp - i]*np.eye(N_samp,k=i,dtype = np.complex128)
-    
+        
     ## different F matrix for different bloch wavevector k
     for order in range(len(klist)):
         k = klist[order]

@@ -173,16 +173,17 @@ def main_n():
     a = 2.*um
     lbd = 780*nm
     x_bound = (-4*um,4*um)
-    n_fun = lambda x: n2 + (n1-n2)*(np.abs(x)<=a/2)
+    #n_fun = lambda x: n2 + (n1-n2)*(np.abs(x)<=a/2)
+    n_fun = lambda x: np.sqrt(n2**2 + (n1**2 - n2**2)*(1 - (2*np.abs(x)/a)**4)*(np.abs(x)<=a/2)  )
     
-    d = -1e-7
-    delta_n_fun = lambda x,E: d * np.abs(E)**2*(np.abs(x)<=a/2)
-    E2_norm = 6e4
-    
+    d = 1e-7
+    delta_n_fun = lambda x,E: d * np.abs(E)**2*(np.abs(x - a/2)<=a/2)
+    E2_norm = 3e4
+        
     wvg = nonlinear_waveguide_1d(lbd,n_fun,x_bound)
-    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E2_norm = E2_norm,iter = 70)
+    wvg.waveguide_n(mode_num = 0,delta_n_fun = delta_n_fun, E2_norm = E2_norm,iter = 40)
 
 if __name__ == "__main__":
-    main()
-    # main_n()
+    # main()
+    main_n()
         
