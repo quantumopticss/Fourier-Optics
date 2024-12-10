@@ -132,24 +132,24 @@ def main():
     y_bound = (-4*um,4*um)
     
     a = 2*um
-    b = 3*um
-    c = 1.2*um
+    b = 4*um
+    c = 1.6*um
     d = 1*um
     
     n1 = 1.5
     n2 = 1.2
     
-    # n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2) + (n1-n2)*(np.abs(y-a/2-d/2)<=d/2)*(np.abs(x) <= c/2) # + (n1-n2)*(np.abs(y+a/2+d/2)<=d/2)*(np.abs(x) <= c/2)
-    n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2)
+    n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2) + (n1-n2)*(np.abs(y-a/2-d/2)<=d/2)*(np.abs(x) <= c/2) # + (n1-n2)*(np.abs(y+a/2+d/2)<=d/2)*(np.abs(x) <= c/2)
+    # n_fun =  lambda x,y : n2 + (n1 - n2)*(np.abs(x) <= b/2)*(np.abs(y) <= a/2)
     # n_fun = lambda x,y : n2 + (n1-n2)*(np.sqrt(x**2 + y**2) <= a )
     
     lbd = 780*nm
-    wvg = waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 128)
-    wvg.waveguide_2d(mode_num = 2)
+    wvg = waveguide_2d(lbd,n_fun,x_bound = x_bound,y_bound = y_bound,N_mesh = 160)
+    wvg.waveguide_2d(mode_num = 0)
     
 def main_n():
-    x_bound = (-3*um,3*um)
-    y_bound = (-3*um,3*um)
+    x_bound = (-4*um,4*um)
+    y_bound = (-4*um,4*um)
     
     a = 2.*um
     b = 3.*um

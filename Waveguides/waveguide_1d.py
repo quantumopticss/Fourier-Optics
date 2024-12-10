@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import root_scalar
 from scipy import sparse 
 from scipy.sparse import linalg
+from scipy.linalg import eigh
 
 """
 helmholtz equation (\nabla^2 + n^2*k0^2)U = 0
@@ -64,7 +65,7 @@ class waveguide_1d_plot:
         fig, ax = plt.subplots()
         ax.plot(self.xlist*1e6,np.abs(field),label = "field distribution",c = "r")
         ax1 = ax.twinx()
-        ax1.plot(self.xlist*1e6,nlist,label = "refractive index",c = "b")
+        ax1.plot(self.xlist*1e6,np.abs(nlist),label = "refractive index",c = "b")
         ax.legend()
         ax.axvline(x=0, color='green', linestyle='--', linewidth=1.5,label = f"center")
         ax.set_xlabel("x/um")
@@ -77,12 +78,12 @@ class waveguide_1d_plot:
         plt.show()
 
 class waveguide_1d(waveguide_1d_plot):
-    def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 640):
+    def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 640,sparce = True):
         # self.hx = (x_bound[1] - x_bound[0])/N_mesh
         # xlist_r = np.arange(self.hx,x_bound[1],self.hx)
         # xlist_l = np.arange(0,-x_bound[0]+self.hx,self.hx)
         # self.xlist = np.concatenate((-xlist_l[::-1],xlist_r),axis = 0) 
-        
+        self._sparce = sparce
         self.xlist = np.linspace(x_bound[0],x_bound[1],N_mesh,endpoint = True,dtype = np.longdouble)
         self.hx = self.xlist[1] - self.xlist[0]
         
@@ -91,13 +92,20 @@ class waveguide_1d(waveguide_1d_plot):
         
         self.mat_d = (-2*np.eye(N_mesh) + np.eye(N_mesh,k=1) + np.eye(N_mesh,k=-1))/(self.hx**2)
         mat_c = np.zeros_like(self.mat_d)
-        mat_c[np.arange(N_mesh),np.arange(N_mesh)] = (self.n_x*self.k0)**2
+        mat_c[np.arange(N_mesh),np.arange(N_mesh)] = np.real((self.n_x*self.k0)**2)
+
     
         F = self.mat_d + mat_c
-        self.F = sparse.dia_matrix(F)
+        if sparce == True:
+            self.F = sparse.dia_matrix(F)
+        else:
+            self.F = F
     
     def waveguide(self,mode_num = 0):
-        eig_val, eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
+        if self._sparce == True:
+            eig_val, eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
+        else:
+            eig_val, eig_vec = eigh(self.F)
         self.mode_num = mode_num
         
         Neff = np.sqrt(eig_val[-(1+mode_num)])/self.k0
@@ -106,8 +114,8 @@ class waveguide_1d(waveguide_1d_plot):
         self._visualization(self.n_x,field,Neff)
 
 class nonlinear_waveguide_1d(waveguide_1d):
-    def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 480):
-        waveguide_1d.__init__(self,lbd0,n_fun,x_bound,args,N_mesh)
+    def __init__(self,lbd0,n_fun,x_bound,args = (),N_mesh = 480,sparce = True):
+        waveguide_1d.__init__(self,lbd0,n_fun,x_bound,args,N_mesh,sparce=sparce)
         self.L = x_bound[1] - x_bound[0]
         self.N = N_mesh
         
@@ -115,7 +123,10 @@ class nonlinear_waveguide_1d(waveguide_1d):
         self.mode_num = mode_num
         self.delta_n_fun = delta_n_fun
         self.E2_norm = E2_norm
-        _, self.eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
+        if self._sparce == True:
+            _, self.eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
+        else:
+            _, self.eig_vec = eigh(self.F)
         
         n1 = iter//3 + 1
         i_amp = np.linspace(0.2,1,n1)
@@ -126,7 +137,10 @@ class nonlinear_waveguide_1d(waveguide_1d):
         for _ in range(n2):
             self._iteration(1)
         
-        eig_val, eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
+        if self._sparce == True:
+            eig_val, eig_vec = linalg.eigsh(self.F,k = mode_num+1,which = "LA")
+        else:
+            eig_val, self.eig_vec = eigh(self.F)
         
         Neff_n = np.sqrt(eig_val[-(1+mode_num)])/self.k0
         field_n = eig_vec[:,-(1+mode_num)]
@@ -148,7 +162,10 @@ class nonlinear_waveguide_1d(waveguide_1d):
         mat_c_n[np.arange(self.N),np.arange(self.N)] = self.n_x_n
         
         F = self.mat_d + (mat_c_n*self.k0)**2
-        self.F = sparse.dia_matrix(F)
+        if self._sparce == True:
+            self.F = sparse.dia_matrix(F)
+        else:
+            self.F = F
         
         _, self.eig_vec = linalg.eigsh(self.F,k = 1+self.mode_num,which = "LA")
 
