@@ -10,3 +10,15 @@ Waveguides/SPP_waveguides/SPP_0.mph
 Waveguides/Coupled Waveguides/nonlinear waveguides.mph
 Waveguides/Coupled Waveguides/coupled waveguides.mph
 Waveguides/Coupled Waveguides/coupled waveguides - 2.mph
+Waveguides/__pycache__/waveguide_1d.cpython-310.pyc
+Fibers/__pycache__/fiber_plot.cpython-310.pyc
+Fibers/__pycache__/fiber_solve.cpython-310.pyc
+Fibers/__pycache__/fiber_plot.cpython-310.pyc
+Waveguides/__pycache__/waveguide_1d.cpython-310.pyc
+Waveguides/__pycache__/waveguide_1d.cpython-310.pyc
+*.mph
+Propagation_RSS/air gap.mph
+Waveguides/__pycache__/waveguide_1d.cpython-310.pyc
+Fibers/__pycache__/fiber_plot.cpython-310.pyc
+*.mph
+*.pyc
