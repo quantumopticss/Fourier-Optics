@@ -23,7 +23,7 @@ R(rho) = u(rho)/np.sqrt(rho)
 """
 ### users set
 
-fiber = "GRIN_fiber"
+fiber = "step_index_fiber"
 # fiber = "GRIN_fiber"
 num = 0 # solve index
 
@@ -37,7 +37,7 @@ n2 = 1.4378 # cladding
 Delta = (n1**2 - n2**2)/(2*n1**2) # fiber Delta parameter
 P = 2 # GRIN fiber P index 
 
-L = 1 # azimuthal index
+L = 2 # azimuthal index
 M = 2 # fiber radical order index
 k0 = 2*pi/lbd # vaccuum wavevector
 
