@@ -8,17 +8,17 @@ import matplotlib.pyplot as plt
 
 nu0 = 1000*Hz
 
-tau = 30*ms # lifetime
+tau = 10*ms # lifetime
 # E = E0*np.exp(-t/tau)*np.exp(1j*2*pi*nu*t) with natural linewidth delta_nu = 1/(2*pi*tau)
 
 f = 3000*Hz # sampling frequency
-f_col = 100*Hz # collision frequency
+f_col = 500*Hz # collision frequency
 T = 60*tau # total samping time
 
 N = int(2*f*T) # sampling points
 tlist, delta_t = np.linspace(-T,T,N,retstep=True,endpoint=False)
 
-num = 10000 # times
+num = 5000 # times
 E0 = 100*V/m
 col_count = np.zeros([num])
 
@@ -51,13 +51,11 @@ f_left = np.min(f_area)
 f_right = np.max(f_area)
 
 plt.figure(1)
-plt.plot(tlist[20000:40000]*1000,np.abs(E_list[20000:40000]),label = f"real E @ t")
+plt.plot(tlist*1000,np.abs(E_list),label = f"real E @ t")
 plt.legend()
 plt.xlabel("time/ms")
 plt.ylabel("E amp")
 plt.title(f"collision broadening, with tau = {tau*1000:.3f}ms, f_col = {f_col:.3f}Hz")
-plt.axvline(x=f_left, color='red', linestyle='--', label=f'FWHM Left: {f_left:.2f}')
-plt.axvline(x=f_right, color='red', linestyle='--', label=f'FWHM Right: {f_right:.2f}')
 
 from scipy.optimize import curve_fit
 def f_func(x,gamma,A,nu0):
