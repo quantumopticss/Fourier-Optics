@@ -20,13 +20,13 @@ from scipy.special import erfinv
 # dp = g*dnu' = f*dv = f*c/nu0 * dnu' -> g = c/nu0 * f
 # g = 1/(u*sqrt(pi)) * np.exp( (c/u)**2*(nu'/nu - 1)**2 ) * c/nu0
 
-T = 100000000000000 # K
+T = 90000000000000 # K
 mu_m = 12*1e-3*kg
-num = 20000 # num
+num = 30000 # num
 
-E0 = 10*V/m
-nu0 = 750*Hz # central freq
-f_samp = 2000*Hz 
+E0 = 1*V/m
+nu0 = 370*Hz # central freq
+f_samp = 1000*Hz 
 
 tau = 2*ms # lifetime
 N = int(100*tau*f_samp)
@@ -44,9 +44,9 @@ for _ in range(num):
     v = u * erfinv(2*p - 1.)
     
     nu = nu0 * (1 + v/c0_const)
-    Elist_c = Elist_c + E0 * np.exp(-np.abs(tlist)/tau)*np.exp(1j*2*pi*nu*tlist)
+    Elist_c = Elist_c + E0 * np.exp(-np.abs(tlist)/tau) * np.exp(1j*2*pi*nu*tlist)
     Elist_d = Elist_d + E0 * np.exp(1j*2*pi*nu*tlist)
-
+    
 Elist_0 = num*E0*np.exp(-np.abs(tlist)/tau)*np.exp(1j*2*pi*nu0*tlist)
 
 f_E0 = np.fft.fftshift(np.fft.fft(Elist_0))*dt
@@ -55,15 +55,24 @@ f_Ed = np.fft.fftshift(np.fft.fft(Elist_d))*dt
 f_nu = np.arange(-N//2,N//2)/(20*tau)
 d_nu = 1/(20*tau)
 
-fig, ax = plt.subplots()
+
 g = c0_const/(nu0*u*np.sqrt(pi)) * np.exp(-(c0_const*(f_nu/nu0 -1)/u)**2)
+
 # ax.plot(f_nu,np.abs(f_E0),label = "nature")
 # ax.plot(f_nu,np.abs(f_Ec),label = "dopper + nature")
-ax.plot(f_nu,np.abs(f_Ed),label = "dopper") # -> E0**2 * 20*tau
-ax.plot(f_nu,g*num*E0,label = "dopper - cal")
+fig, ax = plt.subplots()
+ax.plot(f_nu,np.abs(f_Ed),label = "dopper") # -> E0**2 * num**2 
+ax.plot(f_nu,g*num*E0,label = "dopper - cal") # g * d_nu = d_p
 ax.set_xlabel("freq/Hz")
 ax.set_ylabel("amp")
 ax.set_title(f"doppler broadening @ T = {T}K, vp = {1e4*beta:.3f}*1e-4*c")
 ax.legend()
+
+fig1, ax1 = plt.subplots()
+ax1.plot(f_nu,np.abs(f_Ec),label = "dopper + nature") # -> E0**2 * num**2 
+ax1.set_xlabel("freq/Hz")
+ax1.set_ylabel("amp")
+ax1.set_title(f"nature + doppler broadening @ T = {T}K, vp = {1e4*beta:.3f}*1e-4*c")
+ax1.legend()
 
 plt.show()
