@@ -49,20 +49,19 @@ for _ in range(num):
     
 Elist_0 = num*E0*np.exp(-np.abs(tlist)/tau)*np.exp(1j*2*pi*nu0*tlist)
 
-f_E0 = np.fft.fftshift(np.fft.fft(Elist_0))*dt
-f_Ec = np.fft.fftshift(np.fft.fft(Elist_c))*dt
-f_Ed = np.fft.fftshift(np.fft.fft(Elist_d))*dt
+f_E0 = np.abs(np.fft.fftshift(np.fft.fft(Elist_0))*dt)**2
+f_Ec = np.abs(np.fft.fftshift(np.fft.fft(Elist_c))*dt)**2
+f_Ed = np.abs(np.fft.fftshift(np.fft.fft(Elist_d))*dt)**2
 f_nu = np.arange(-N//2,N//2)/(20*tau)
 d_nu = 1/(20*tau)
-
 
 g = c0_const/(nu0*u*np.sqrt(pi)) * np.exp(-(c0_const*(f_nu/nu0 -1)/u)**2)
 
 # ax.plot(f_nu,np.abs(f_E0),label = "nature")
 # ax.plot(f_nu,np.abs(f_Ec),label = "dopper + nature")
 fig, ax = plt.subplots()
-ax.plot(f_nu,np.abs(f_Ed),label = "dopper") # -> E0**2 * num**2 
-ax.plot(f_nu,g*num*E0,label = "dopper - cal") # g * d_nu = d_p
+ax.plot(f_nu,f_Ed,label = "dopper") # -> E0**2 * num**2 
+ax.plot(f_nu,(g*num*E0)**2,label = "dopper - cal") # g * d_nu = d_p
 ax.set_xlabel("freq/Hz")
 ax.set_ylabel("amp")
 ax.set_title(f"doppler broadening @ T = {T}K, vp = {1e4*beta:.3f}*1e-4*c")

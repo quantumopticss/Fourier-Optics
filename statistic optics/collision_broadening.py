@@ -25,7 +25,7 @@ col_count = np.zeros([num])
 eff:int = 10 # effect cal
 E_list = np.zeros_like(tlist,dtype = complex)
 for j in range(num):
-    phi_list = 2*pi*nu0*tlist + np.random.rand()*2*pi # generate a perfect phase
+    phi_list = 2*pi*nu0*tlist # + np.random.rand()*2*pi # generate a perfect phase
     # collision broadening
     p = np.random.rand(len(phi_list))
     p_add = (p <= delta_t*f_col)
@@ -40,8 +40,8 @@ for j in range(num):
 print(f"average collision = {np.mean(col_count):.2f}")    
 print(f"f_col*tau = {f_col*tau:.2f}")
 
-f_E = np.abs(np.fft.fftshift(np.fft.fft(E_list))*delta_t)
-f_nu = np.arange(-N//2,N//2)/(2*T)
+f_E = np.abs(np.fft.fftshift(np.fft.fft(E_list))*delta_t)**2
+f_nu = np.arange(-N//2,N//2)/(2*T) + nu0
 
 ## width
 half = np.max(f_E)/2
@@ -66,7 +66,7 @@ P0 = np.array([f_col+1/(tau),half*2,nu0])
 p_opt, _ = curve_fit(f_func,f_nu,f_E,p0=P0)
 
 plt.figure(2)
-plt.plot(f_nu,np.abs(f_E),label = f"w = {1/(pi*tau):.3f}Hz, FWHM = {(f_right - f_left):.3f}Hz")
+plt.plot(f_nu,f_E,label = f"w = {1/(pi*tau):.3f}Hz, FWHM = {(f_right - f_left):.3f}Hz")
 plt.plot(f_nu,f_func(f_nu,*p_opt),label = f"lorentz fit, width = {p_opt[0]}")
 plt.legend()
 plt.xlabel("freq")
