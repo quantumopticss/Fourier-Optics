@@ -33,7 +33,7 @@ def test_1d():
     plt.show()
     
 def test_2d():
-    d1 = 2*m
+    d1 = 0.1*m
     dx = 0.05*mm
 
     z0 = 5*m
@@ -57,17 +57,17 @@ def test_2d():
     E_ana = w0/w1*np.exp(-(rr*dx/w1)**2)*np.exp(-1j*k*(rr*dx)**2/(-2*R1))*np.exp(-1j*np.arctan(d1/z0))
     
     plt.figure(1)
-    plt.imshow(np.real(E_simu),label = "simu")
+    plt.imshow(np.abs(E_simu),label = "simu")
     plt.title("simu")
     plt.colorbar()
     
     plt.figure(2)
-    plt.imshow(np.real(E_ana),label = "ana")
+    plt.imshow(np.abs(E_ana),label = "ana")
     plt.title("ana")
     plt.colorbar()
     
     plt.figure(3)
-    plt.imshow(np.real(E),label = "raw")
+    plt.imshow(np.abs(E),label = "raw")
     plt.title("raw")
     plt.colorbar()
     
