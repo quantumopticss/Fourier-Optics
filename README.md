@@ -5,7 +5,7 @@ you can find some classic topics, including **Photonic Crystal & WaveGuids, Five
 Diveinto **professional Python Coding Skills** and **useful physics(Optics) simulation skills**, you will know how to do **high performance computation tasks** using powerful tools including **numpy, scipy, pytorch** and useful visualization tool including **matplotlib, seaborn**
 
 # What the code is:
-This code base privide some simulations based on fundamental formulars. For example, for Waveguides, can get helmholtz Eq from Maxwell Eq:
+This code base privide some simulations based on fundamental formulars. For example, for Waveguides (fiber is a special kind of waveguids, which has the same Eq but different requirements and targets), we can get helmholtz Eq from Maxwell Eq:
 
 $$
 \left[\nabla_T^2 + (\frac{n(x,y)^2\omega^2}{c_0^2} - \beta^2 )\right] U(x,y) = 0
