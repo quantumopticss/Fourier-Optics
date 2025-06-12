@@ -16,7 +16,7 @@ $$
 In discrete form, it can be turned to a eigenvalue question:
 
 $$
-A_{m,n} \phi_n = \lambda \phi_n
+A_{m,n} \phi_n = \lambda \phi_m
 $$
 
 which can be solved using scipy.linalg, 
