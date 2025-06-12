@@ -9,9 +9,11 @@ Diveinto **professional Python Coding Skills** and **useful physics(Optics) simu
 This code base privide some simulations based on fundamental formulars. For example, for Waveguides (fiber is a special kind of waveguids, which has the same Eq but different requirements and targets), we can get helmholtz Eq from Maxwell Eq:
 
 $$
-\left[\nabla_T^2 + (\frac{n(x,y)^2\omega^2}{c_0^2} - \beta^2 )\right] U(x,y) = 0
+\begin{align}
+\left[\nabla_T^2 + (\frac{n(x,y)^2\omega^2}{c_0^2} - \beta^2 )\right] U(x,y) &= 0
 \\
-U(x,y,z) = U(x,y) e^{-j\beta z}
+U(x,y,z) &= U(x,y) e^{-j\beta z}
+\end{align}
 $$
 
 In discrete form, it can be turned to a eigenvalue question:
