@@ -46,7 +46,7 @@ class fiber:
         fig.legend()
         
         plt.show()
-        
+
 def main():
     a = 8*um # raidus of fiber core
     A = 4 # amp of solve area
