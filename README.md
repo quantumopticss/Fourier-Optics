@@ -14,15 +14,17 @@ U(x,y,z) = U(x,y) e^{-j\beta z}
 $$
 
 In discrete form, it can be turned to a eigenvalue question:
+
 $$
 A_{m,n} \phi_n = \lambda \phi_n
 $$
+
 which can be solved using scipy.linalg, 
 
 If you divinto this question,you will find that I use scipy.sparse.linalg because of almost 90% lements for the Matrix $A_{m,n}$ is zero, the reason for that is now up for grabs waiting for you.
 
 # How to use:
-You are strongly suggested learning and rebuilding this code base,
+You are strongly recommended learning and rebuilding this code base,
 when you are learning, (after you have learned) Electron Dynamics(电动力学)，and Computational Physica(计算物理)
 
 
