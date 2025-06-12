@@ -1,10 +1,11 @@
+# Optics & Photonics
 Zifeng Li's code for Optics Simulations, also include some Comsol (FEM Software) files,
 you can find some classic topics, including **Photonic Crystal & WaveGuids, Fivers, Cavity, Nonlinear Optics, Fourier Optics**
 
-# What you can get?
+# What can you learn?
 Diveinto **professional Python Coding Skills** and **useful physics(Optics) simulation skills**, you will know how to do **high performance computation tasks** using powerful tools including **numpy, scipy, pytorch** and useful visualization tool including **matplotlib, seaborn**
 
-# What the code is:
+# What the code is?
 This code base privide some simulations based on fundamental formulars. For example, for Waveguides (fiber is a special kind of waveguids, which has the same Eq but different requirements and targets), we can get helmholtz Eq from Maxwell Eq:
 
 $$
@@ -23,7 +24,7 @@ which can be solved using scipy.linalg,
 
 If you divinto this question,you will find that I use scipy.sparse.linalg because of almost 90% lements for the Matrix $A_{m,n}$ is zero, the reason for that is now up for grabs waiting for you.
 
-# How to use:
+# How to use this code?
 You are strongly recommended learning and rebuilding this code base,
 when you are learning, (after you have learned) Electron Dynamics(电动力学)，and Computational Physica(计算物理)
 
